@@ -1,7 +1,7 @@
 # ChatGPT Telegram Bot: **Fast. No daily limits. Special chat modes**
 
 <div align="center">
-<img src="https://raw.githubusercontent.com/karfly/chatgpt_telegram_bot/main/static/header.png" align="center" style="width: 100%" />
+<img src="./static/header.png" align="center" style="width: 100%" />
 </div>
 
 <p align="center">
