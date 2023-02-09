@@ -2,6 +2,9 @@ import yaml
 import dotenv
 from pathlib import Path
 
+MONGODB_IP = "localhost"
+MONGODB_PORT = 27017  # MongoDB port
+
 config_dir = Path(__file__).parent.parent.resolve() / "conf"
 
 # load yaml config
@@ -16,4 +19,4 @@ telegram_token = config_yaml["telegram_token"]
 openai_api_key = config_yaml["openai_api_key"]
 allowed_telegram_usernames = config_yaml["allowed_telegram_usernames"]
 new_dialog_timeout = config_yaml["new_dialog_timeout"]
-mongodb_uri = f"mongodb://localhost:{config_env['MONGODB_PORT']}"
+mongodb_uri = f"mongodb://{MONGODB_IP}:{MONGODB_PORT}"
