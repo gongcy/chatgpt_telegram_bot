@@ -1,0 +1,16 @@
+# /etc/systemd/system/chatgpt.service
+
+[Unit]
+Description=ChatGPT Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Restart=on-failure
+RestartSec=5s
+ExecStart=/opt/chatgpt_telegram_bot/start.sh
+LimitNOFILE=1048576
+
+[Install]
+WantedBy=multi-user.target
