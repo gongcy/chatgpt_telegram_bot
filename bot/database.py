@@ -1,8 +1,8 @@
+import uuid
+from datetime import datetime
 from typing import Optional, Any
 
 import pymongo
-import uuid
-from datetime import datetime
 
 import config
 
@@ -23,7 +23,7 @@ class Database:
                 raise ValueError(f"User {user_id} does not exist")
             else:
                 return False
-        
+
     def add_new_user(
         self,
         user_id: int,
@@ -42,7 +42,7 @@ class Database:
 
             "last_interaction": datetime.now(),
             "first_seen": datetime.now(),
-            
+
             "current_dialog_id": None,
             "current_chat_mode": "assistant",
 
@@ -51,8 +51,6 @@ class Database:
 
         if not self.check_if_user_exists(user_id):
             self.user_collection.insert_one(user_dict)
-            
-        # TODO: maybe start a new dialog here?
 
     def start_new_dialog(self, user_id: int):
         self.check_if_user_exists(user_id, raise_exception=True)
@@ -96,7 +94,7 @@ class Database:
         if dialog_id is None:
             dialog_id = self.get_user_attribute(user_id, "current_dialog_id")
 
-        dialog_dict = self.dialog_collection.find_one({"_id": dialog_id, "user_id": user_id})               
+        dialog_dict = self.dialog_collection.find_one({"_id": dialog_id, "user_id": user_id})
         return dialog_dict["messages"]
 
     def set_dialog_messages(self, user_id: int, dialog_messages: list, dialog_id: Optional[str] = None):
@@ -104,7 +102,7 @@ class Database:
 
         if dialog_id is None:
             dialog_id = self.get_user_attribute(user_id, "current_dialog_id")
-        
+
         self.dialog_collection.update_one(
             {"_id": dialog_id, "user_id": user_id},
             {"$set": {"messages": dialog_messages}}
