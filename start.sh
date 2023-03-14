@@ -1,3 +1,4 @@
 #!/bin/bash
 
-python3 /root/chatgpt_telegram_bot/bot/bot.py
+CURRENT_DIR="$(cd "$(dirname $0)"; pwd)"
+python3 "$CURRENT_DIR"/start.py
