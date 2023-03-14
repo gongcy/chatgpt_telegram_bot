@@ -1,3 +1,5 @@
+import traceback
+
 import openai
 
 from bot import config
@@ -54,6 +56,9 @@ class ChatGPT:
 
                 # forget first message in dialog_messages
                 dialog_messages = dialog_messages[1:]
+            except Exception as e:
+                print(e)
+                print(traceback.format_exc())
 
         n_first_dialog_messages_removed = n_dialog_messages_before - len(dialog_messages)
 
