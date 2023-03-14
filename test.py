@@ -3,16 +3,14 @@
 import openai
 
 from bot.config import openai_api_key
+from bot.openai_utils import OPENAI_COMPLETION_OPTIONS
 
 
 def generate_text(prompt):
     response = openai.Completion.create(
-        engine="davinci",
+        engine="text-davinci-003",
         prompt=prompt,
-        max_tokens=60,
-        n=1,
-        stop=None,
-        temperature=0.5,
+        **OPENAI_COMPLETION_OPTIONS
     )
     text = response.choices[0].text
     return text.strip()
