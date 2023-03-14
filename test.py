@@ -2,7 +2,6 @@
 
 import openai
 
-from bot.config import openai_api_key
 from bot.openai_utils import OPENAI_COMPLETION_OPTIONS
 
 
@@ -17,7 +16,6 @@ def generate_text(prompt):
 
 
 if __name__ == '__main__':
-    openai.api_key = openai_api_key
     prompt = "在一个阳光明媚的早晨，一个年轻人走进了一家咖啡店。"
     generated_text = generate_text(prompt)
     print(generated_text)
