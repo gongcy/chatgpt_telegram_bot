@@ -2,7 +2,6 @@
 import asyncio
 
 import openai
-
 from bot.openai_utils import OPENAI_COMPLETION_OPTIONS
 
 
