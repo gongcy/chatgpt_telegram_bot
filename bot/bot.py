@@ -9,6 +9,13 @@ from pathlib import Path
 
 import pydub
 import telegram
+from telegram import (
+    Update,
+    User,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    BotCommand
+)
 from telegram.constants import ParseMode
 from telegram.ext import (
     Application,
