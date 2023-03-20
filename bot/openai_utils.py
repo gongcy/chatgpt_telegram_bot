@@ -1,12 +1,12 @@
-import sys
+# import sys
 
-sys.path.append("..")
+# sys.path.append("..")
 import traceback
 
 import tiktoken
-import openai
 
 import config
+import openai
 
 openai.api_key = config.openai_api_key
 
