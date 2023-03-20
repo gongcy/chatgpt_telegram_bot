@@ -5,7 +5,7 @@ import traceback
 
 import tiktoken
 
-import config
+from bot import config
 import openai
 
 openai.api_key = config.openai_api_key
