@@ -4,7 +4,7 @@ from typing import Optional, Any
 
 import pymongo
 
-import config
+from bot import config
 
 
 class Database:
