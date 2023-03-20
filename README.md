@@ -74,12 +74,10 @@ You can deploy your own bot, or use mine: [@chatgpt_karfly_bot](https://t.me/cha
 
 ## Note
 
-In order to fix the following problem, change openai implementation
-
-```
-aiohttp.client_exceptions.ClientConnectorCertificateError:
-Cannot connect to host api.openai.com:443 ssl:True
-[SSLCertVerificationError: (1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1108)')]
-```
-
-refer to [解决python中aiohttp证书出错的问题](https://blog.csdn.net/weixin_45727633/article/details/124226852)
+1. In order to fix the following problem, change openai implementation
+    ```
+    aiohttp.client_exceptions.ClientConnectorCertificateError:
+    Cannot connect to host api.openai.com:443 ssl:True
+    [SSLCertVerificationError: (1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1108)')]
+    ```
+   refer to [解决python中aiohttp证书出错的问题](https://blog.csdn.net/weixin_45727633/article/details/124226852)
