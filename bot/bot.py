@@ -28,9 +28,9 @@ from telegram.ext import (
     filters
 )
 
-from bot import config
-from bot import database
-from bot import openai_utils
+import config
+import database
+import openai_utils
 
 # setup
 db = database.Database()
