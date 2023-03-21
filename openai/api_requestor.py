@@ -585,7 +585,6 @@ class APIRequestor:
             "timeout": timeout,
         }
         try:
-            # async with aiohttp.ClientSession(connector=TCPConnector(ssl=False)) as session:
             result = await session.request(**request_kwargs)
             util.log_info(
                 "OpenAI API response",
