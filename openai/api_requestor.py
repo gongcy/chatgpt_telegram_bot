@@ -585,21 +585,21 @@ class APIRequestor:
             "timeout": timeout,
         }
         try:
-            async with aiohttp.ClientSession(connector=TCPConnector(ssl=False)) as session:
-                result = await session.request(**request_kwargs)
-                util.log_info(
-                    "OpenAI API response",
-                    path=abs_url,
-                    response_code=result.status,
-                    processing_ms=result.headers.get("OpenAI-Processing-Ms"),
-                    request_id=result.headers.get("X-Request-Id"),
+            # async with aiohttp.ClientSession(connector=TCPConnector(ssl=False)) as session:
+            result = await session.request(**request_kwargs)
+            util.log_info(
+                "OpenAI API response",
+                path=abs_url,
+                response_code=result.status,
+                processing_ms=result.headers.get("OpenAI-Processing-Ms"),
+                request_id=result.headers.get("X-Request-Id"),
+            )
+            # Don't read the whole stream for debug logging unless necessary.
+            if openai.log == "debug":
+                util.log_debug(
+                    "API response body", body=result.content, headers=result.headers
                 )
-                # Don't read the whole stream for debug logging unless necessary.
-                if openai.log == "debug":
-                    util.log_debug(
-                        "API response body", body=result.content, headers=result.headers
-                    )
-                return result
+            return result
         except (aiohttp.ServerTimeoutError, asyncio.TimeoutError) as e:
             raise error.Timeout("Request timed out") from e
         except aiohttp.ClientError as e:
@@ -693,5 +693,5 @@ async def aiohttp_session() -> AsyncIterator[aiohttp.ClientSession]:
     if user_set_session:
         yield user_set_session
     else:
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(connector=TCPConnector(ssl=False)) as session:
             yield session
