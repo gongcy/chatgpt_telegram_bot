@@ -1,4 +1,4 @@
-# ChatGPT Telegram Bot: **Fast. No daily limits. Special chat modes**
+# ChatGPT Telegram Bot: **GPT-4. Fast. No daily limits. Special chat modes**
 
 <div align="center">
 <img src="./static/header.png" align="center" style="width: 100%" />
@@ -7,7 +7,7 @@
 We all love [chat.openai.com](https://chat.openai.com), but... It's TERRIBLY laggy, has daily limits, and is only
 accessible through an archaic web interface.
 
-This repo is ChatGPT re-created with GPT-3.5 LLM as Telegram Bot. **And it works great.**
+This repo is ChatGPT re-created as Telegram Bot. **And it works great.**
 
 You can deploy your own bot, or use mine: [@chatgpt_karfly_bot](https://t.me/chatgpt_karfly_bot)
 
@@ -16,6 +16,7 @@ You can deploy your own bot, or use mine: [@chatgpt_karfly_bot](https://t.me/cha
 - Low latency replies (it usually takes about 3-5 seconds)
 - No request limits
 - Message streaming (watch demo)
+- GPT-4 support
 - Voice message recognition
 - Code highlighting
 - Special chat modes: 👩🏼‍🎓 Assistant, 👩🏼‍💻 Code Assistant, 📝 Text Improver and 🎬 Movie Expert. You can easily create
@@ -32,6 +33,7 @@ You can deploy your own bot, or use mine: [@chatgpt_karfly_bot](https://t.me/cha
 
 ## News
 
+- *24 Mar 2023*: GPT-4 support. Run `/settings` command to choose model
 - *15 Mar 2023*: Added message streaming. Now you don't have to wait until the whole message is ready, it's streamed to
   Telegram part-by-part (watch demo)
 - *9 Mar 2023*: Now you can easily create your own Chat Modes by editing `config/chat_modes.yml`
@@ -48,6 +50,7 @@ You can deploy your own bot, or use mine: [@chatgpt_karfly_bot](https://t.me/cha
 - `/new` – Start new dialog
 - `/mode` – Select chat mode
 - `/balance` – Show balance
+- `/settings` – Show settings
 - `/help` – Show help
 
 ## Setup
