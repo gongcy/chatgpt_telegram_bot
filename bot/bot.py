@@ -140,6 +140,7 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
     if await is_previous_message_not_answered_yet(update, context): return
 
     user_id = update.message.from_user.id
+
     async def message_handle_fn():
         chat_mode = db.get_user_attribute(user_id, "current_chat_mode")
 
@@ -175,9 +176,11 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
 
             chatgpt_instance = openai_utils.ChatGPT(model=current_model)
             if config.enable_message_streaming:
-                gen = chatgpt_instance.send_message_stream(_message, dialog_messages=dialog_messages, chat_mode=chat_mode)
+                gen = chatgpt_instance.send_message_stream(_message, dialog_messages=dialog_messages,
+                                                           chat_mode=chat_mode)
             else:
-                answer, (n_input_tokens, n_output_tokens), n_first_dialog_messages_removed = await chatgpt_instance.send_message(
+                answer, (
+                n_input_tokens, n_output_tokens), n_first_dialog_messages_removed = await chatgpt_instance.send_message(
                     _message,
                     dialog_messages=dialog_messages,
                     chat_mode=chat_mode
@@ -199,12 +202,15 @@ async def message_handle(update: Update, context: CallbackContext, message=None,
                     continue
 
                 try:
-                    await context.bot.edit_message_text(answer, chat_id=placeholder_message.chat_id, message_id=placeholder_message.message_id, parse_mode=parse_mode)
+                    await context.bot.edit_message_text(answer, chat_id=placeholder_message.chat_id,
+                                                        message_id=placeholder_message.message_id,
+                                                        parse_mode=parse_mode)
                 except telegram.error.BadRequest as e:
                     if str(e).startswith("Message is not modified"):
                         continue
                     else:
-                        await context.bot.edit_message_text(answer, chat_id=placeholder_message.chat_id, message_id=placeholder_message.message_id)
+                        await context.bot.edit_message_text(answer, chat_id=placeholder_message.chat_id,
+                                                            message_id=placeholder_message.message_id)
 
                 await asyncio.sleep(0.01)  # wait a bit to avoid flooding
 
@@ -295,7 +301,8 @@ async def voice_message_handle(update: Update, context: CallbackContext):
     await update.message.reply_text(text, parse_mode=ParseMode.HTML)
 
     # update n_transcribed_seconds
-    db.set_user_attribute(user_id, "n_transcribed_seconds", voice.duration + db.get_user_attribute(user_id, "n_transcribed_seconds"))
+    db.set_user_attribute(user_id, "n_transcribed_seconds",
+                          voice.duration + db.get_user_attribute(user_id, "n_transcribed_seconds"))
 
     await message_handle(update, context, message=transcribed_text)
 
@@ -429,16 +436,20 @@ async def show_balance_handle(update: Update, context: CallbackContext):
 
     details_text = "🏷️ Details:\n"
     for model_key in sorted(n_used_tokens_dict.keys()):
-        n_input_tokens, n_output_tokens = n_used_tokens_dict[model_key]["n_input_tokens"], n_used_tokens_dict[model_key]["n_output_tokens"]
+        n_input_tokens, n_output_tokens = n_used_tokens_dict[model_key]["n_input_tokens"], \
+                                          n_used_tokens_dict[model_key]["n_output_tokens"]
         total_n_used_tokens += n_input_tokens + n_output_tokens
 
-        n_input_spent_dollars = config.models["info"][model_key]["price_per_1000_input_tokens"] * (n_input_tokens / 1000)
-        n_output_spent_dollars = config.models["info"][model_key]["price_per_1000_output_tokens"] * (n_output_tokens / 1000)
+        n_input_spent_dollars = config.models["info"][model_key]["price_per_1000_input_tokens"] * (
+                n_input_tokens / 1000)
+        n_output_spent_dollars = config.models["info"][model_key]["price_per_1000_output_tokens"] * (
+                n_output_tokens / 1000)
         total_n_spent_dollars += n_input_spent_dollars + n_output_spent_dollars
 
         details_text += f"- {model_key}: <b>{n_input_spent_dollars + n_output_spent_dollars:.03f}$</b> / <b>{n_input_tokens + n_output_tokens} tokens</b>\n"
 
-    voice_recognition_n_spent_dollars = config.models["info"]["whisper"]["price_per_1_min"] * (n_transcribed_seconds / 60)
+    voice_recognition_n_spent_dollars = config.models["info"]["whisper"]["price_per_1_min"] * (
+            n_transcribed_seconds / 60)
     if n_transcribed_seconds != 0:
         details_text += f"- Whisper (voice recognition): <b>{voice_recognition_n_spent_dollars:.03f}$</b> / <b>{n_transcribed_seconds:.01f} seconds</b>\n"
 
