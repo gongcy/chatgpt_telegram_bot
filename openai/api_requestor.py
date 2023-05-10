@@ -20,6 +20,7 @@ from urllib.parse import urlencode, urlsplit, urlunsplit
 
 import aiohttp
 import requests
+from aiohttp import TCPConnector
 
 if sys.version_info >= (3, 8):
     from typing import Literal
@@ -76,10 +77,6 @@ def _aiohttp_proxies_arg(proxy) -> Optional[str]:
 
 
 def _make_session() -> requests.Session:
-    if openai.requestssession:
-        if isinstance(openai.requestssession, requests.Session):
-            return openai.requestssession
-        return openai.requestssession()
     if not openai.verify_ssl_certs:
         warnings.warn("verify_ssl_certs is ignored; openai always verifies.")
     s = requests.Session()
@@ -487,7 +484,7 @@ class APIRequestor:
         else:
             raise error.APIConnectionError(
                 "Unrecognized HTTP method %r. This may indicate a bug in the "
-                "OpenAI bindings. Please contact us through our help center at help.openai.com for "
+                "OpenAI bindings. Please contact support@openai.com for "
                 "assistance." % (method,)
             )
 
@@ -525,7 +522,6 @@ class APIRequestor:
                 files=files,
                 stream=stream,
                 timeout=request_timeout if request_timeout else TIMEOUT_SECS,
-                proxies=_thread_context.session.proxies,
             )
         except requests.exceptions.Timeout as e:
             raise error.Timeout("Request timed out: {}".format(e)) from e
@@ -614,11 +610,11 @@ class APIRequestor:
         """Returns the response(s) and a bool indicating whether it is a stream."""
         if stream and "text/event-stream" in result.headers.get("Content-Type", ""):
             return (
-                self._interpret_response_line(
-                    line, result.status_code, result.headers, stream=True
-                )
-                for line in parse_stream(result.iter_lines())
-            ), True
+                       self._interpret_response_line(
+                           line, result.status_code, result.headers, stream=True
+                       )
+                       for line in parse_stream(result.iter_lines())
+                   ), True
         else:
             return (
                 self._interpret_response_line(
@@ -636,11 +632,11 @@ class APIRequestor:
         """Returns the response(s) and a bool indicating whether it is a stream."""
         if stream and "text/event-stream" in result.headers.get("Content-Type", ""):
             return (
-                self._interpret_response_line(
-                    line, result.status, result.headers, stream=True
-                )
-                async for line in parse_stream_async(result.content)
-            ), True
+                       self._interpret_response_line(
+                           line, result.status, result.headers, stream=True
+                       )
+                       async for line in parse_stream_async(result.content)
+                   ), True
         else:
             try:
                 await result.read()
@@ -671,7 +667,7 @@ class APIRequestor:
                 headers=rheaders,
             )
         try:
-            if 'text/plain' in rheaders.get('Content-Type', ''):
+            if 'text/plain' in rheaders.get('Content-Type'):
                 data = rbody
             else:
                 data = json.loads(rbody)
@@ -696,5 +692,5 @@ async def aiohttp_session() -> AsyncIterator[aiohttp.ClientSession]:
     if user_set_session:
         yield user_set_session
     else:
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(connector=TCPConnector(ssl=False)) as session:
             yield session
