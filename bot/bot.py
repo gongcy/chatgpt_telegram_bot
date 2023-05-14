@@ -5,8 +5,8 @@ import logging
 import tempfile
 import traceback
 from datetime import datetime
+from pathlib import Path
 
-import openai
 import pydub
 import telegram
 from telegram import (
@@ -28,6 +28,7 @@ from telegram.ext import (
     filters
 )
 
+import openai
 from bot import config
 from bot import database
 from bot import openai_utils
@@ -618,7 +619,7 @@ async def show_balance_handle(update: Update, context: CallbackContext):
 
     # voice recognition
     voice_recognition_n_spent_dollars = config.models["info"]["whisper"]["price_per_1_min"] * (
-            n_transcribed_seconds / 60)
+        n_transcribed_seconds / 60)
     if n_transcribed_seconds != 0:
         details_text += f"- Whisper (voice recognition): <b>{voice_recognition_n_spent_dollars:.03f}$</b> / <b>{n_transcribed_seconds:.01f} seconds</b>\n"
 
