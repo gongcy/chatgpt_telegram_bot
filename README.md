@@ -43,12 +43,9 @@ This repo is ChatGPT re-created as Telegram Bot. **And it works great.**
 - *15 Mar 2023*: Added message streaming. Now you don't have to wait until the whole message is ready, it's streamed to
   Telegram part-by-part (watch demo)
 - *9 Mar 2023*: Now you can easily create your own Chat Modes by editing `config/chat_modes.yml`
-- *8 Mar 2023*: Added voice message recognition
-  with [OpenAI Whisper API](https://openai.com/blog/introducing-chatgpt-and-whisper-apis). Record a voice message and
-  ChatGPT will answer you!
-- *2 Mar 2023*: Added support of [ChatGPT API](https://platform.openai.com/docs/guides/chat/introduction). It's enabled
-  by default and can be disabled with `use_chatgpt_api` option in config. Don't forget to **rebuild** you docker
-  image (`--build`).
+- *8 Mar 2023*: Added voice message recognition with [OpenAI Whisper API](https://openai.com/blog/introducing-chatgpt-and-whisper-apis). Record a voice message and ChatGPT will answer you!
+- *2 Mar 2023*: Added support of [ChatGPT API](https://platform.openai.com/docs/guides/chat/introduction).
+- *1 Aug 2023*: Added OpenAI API Base to config (useful while using OpenAI-compatible API like [LocalAI](https://github.com/go-skynet/LocalAI))
 
 ## Bot commands
 

@@ -3,6 +3,11 @@ import traceback
 import openai
 import tiktoken
 
+# setup openai
+openai.api_key = config.openai_api_key
+if config.openai_api_base is not None:
+    openai.api_base = config.openai_api_base
+
 from bot import config
 
 openai.api_key = config.openai_api_key
@@ -12,13 +17,14 @@ OPENAI_COMPLETION_OPTIONS = {
     "max_tokens": 1000,
     "top_p": 1,
     "frequency_penalty": 0,
-    "presence_penalty": 0
+    "presence_penalty": 0,
+    "request_timeout": 60.0,
 }
 
 
 class ChatGPT:
     def __init__(self, model="gpt-3.5-turbo"):
-        assert model in {"text-davinci-003", "gpt-3.5-turbo", "gpt-4"}, f"Unknown model: {model}"
+        assert model in {"text-davinci-003", "gpt-3.5-turbo-16k", "gpt-3.5-turbo", "gpt-4"}, f"Unknown model: {model}"
         self.model = model
 
     async def send_message(self, message, dialog_messages=[], chat_mode="assistant"):
@@ -29,7 +35,7 @@ class ChatGPT:
         answer = None
         while answer is None:
             try:
-                if self.model in {"gpt-3.5-turbo", "gpt-4"}:
+                if self.model in {"gpt-3.5-turbo-16k", "gpt-3.5-turbo", "gpt-4"}:
                     messages = self._generate_prompt_messages(message, dialog_messages, chat_mode)
                     r = await openai.ChatCompletion.acreate(
                         model=self.model,
@@ -73,7 +79,7 @@ class ChatGPT:
         answer = None
         while answer is None:
             try:
-                if self.model in {"gpt-3.5-turbo", "gpt-4"}:
+                if self.model in {"gpt-3.5-turbo-16k", "gpt-3.5-turbo", "gpt-4"}:
                     messages = self._generate_prompt_messages(message, dialog_messages, chat_mode)
                     r_gen = await openai.ChatCompletion.acreate(
                         model=self.model,
@@ -156,9 +162,12 @@ class ChatGPT:
     def _count_tokens_from_messages(self, messages, answer, model="gpt-3.5-turbo"):
         encoding = tiktoken.encoding_for_model(model)
 
-        if model == "gpt-3.5-turbo":
+        if model == "gpt-3.5-turbo-16k":
             tokens_per_message = 4  # every message follows <im_start>{role/name}\n{content}<im_end>\n
             tokens_per_name = -1  # if there's a name, the role is omitted
+        elif model == "gpt-3.5-turbo":
+            tokens_per_message = 4
+            tokens_per_name = -1
         elif model == "gpt-4":
             tokens_per_message = 3
             tokens_per_name = 1
@@ -190,13 +199,13 @@ class ChatGPT:
         return n_input_tokens, n_output_tokens
 
 
-async def transcribe_audio(audio_file):
+async def transcribe_audio(audio_file) -> str:
     r = await openai.Audio.atranscribe("whisper-1", audio_file)
-    return r["text"]
+    return r["text"] or ""
 
 
-async def generate_images(prompt, n_images=4):
-    r = await openai.Image.acreate(prompt=prompt, n=n_images, size="512x512")
+async def generate_images(prompt, n_images=4, size="512x512"):
+    r = await openai.Image.acreate(prompt=prompt, n=n_images, size=size)
     image_urls = [item.url for item in r.data]
     return image_urls
 

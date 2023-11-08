@@ -1,13 +1,12 @@
 import asyncio
 import html
+import io
 import json
 import logging
-import tempfile
 import traceback
 from datetime import datetime
 
 import openai
-import pydub
 import telegram
 from telegram import (
     Update,
@@ -91,7 +90,7 @@ async def register_user_if_not_exists(update: Update, context: CallbackContext, 
 
     # back compatibility for n_used_tokens field
     n_used_tokens = db.get_user_attribute(user.id, "n_used_tokens")
-    if isinstance(n_used_tokens, int):  # old format
+    if isinstance(n_used_tokens, int) or isinstance(n_used_tokens, float):  # old format
         new_n_used_tokens = {
             "gpt-3.5-turbo": {
                 "n_input_tokens": 0,
@@ -350,25 +349,15 @@ async def voice_message_handle(update: Update, context: CallbackContext):
     db.set_user_attribute(user_id, "last_interaction", datetime.now())
 
     voice = update.message.voice
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        tmp_dir = Path(tmp_dir)
-        voice_ogg_path = tmp_dir / "voice.ogg"
+    voice_file = await context.bot.get_file(voice.file_id)
 
-        # download
-        voice_file = await context.bot.get_file(voice.file_id)
-        await voice_file.download_to_drive(voice_ogg_path)
+    # store file in memory, not on disk
+    buf = io.BytesIO()
+    await voice_file.download_to_memory(buf)
+    buf.name = "voice.oga"  # file extension is required
+    buf.seek(0)  # move cursor to the beginning of the buffer
 
-        # convert to mp3
-        voice_mp3_path = tmp_dir / "voice.mp3"
-        pydub.AudioSegment.from_file(voice_ogg_path).export(voice_mp3_path, format="mp3")
-
-        # transcribe
-        with open(voice_mp3_path, "rb") as f:
-            transcribed_text = await openai_utils.transcribe_audio(f)
-
-            if transcribed_text is None:
-                transcribed_text = ""
-
+    transcribed_text = await openai_utils.transcribe_audio(buf)
     text = f"🎤: <i>{transcribed_text}</i>"
     await update.message.reply_text(text, parse_mode=ParseMode.HTML)
 
@@ -391,7 +380,8 @@ async def generate_image_handle(update: Update, context: CallbackContext, messag
     message = message or update.message.text
 
     try:
-        image_urls = await openai_utils.generate_images(message, n_images=config.return_n_generated_images)
+        image_urls = await openai_utils.generate_images(message, n_images=config.return_n_generated_images,
+                                                        size=config.image_size)
     except openai.error.InvalidRequestError as e:
         if str(e).startswith("Your request was rejected as a result of our safety system"):
             text = "🥲 Your request <b>doesn't comply</b> with OpenAI's usage policies.\nWhat did you write there, huh?"
@@ -598,7 +588,7 @@ async def show_balance_handle(update: Update, context: CallbackContext):
     details_text = "🏷️ Details:\n"
     for model_key in sorted(n_used_tokens_dict.keys()):
         n_input_tokens, n_output_tokens = n_used_tokens_dict[model_key]["n_input_tokens"], \
-                                          n_used_tokens_dict[model_key]["n_output_tokens"]
+            n_used_tokens_dict[model_key]["n_output_tokens"]
         total_n_used_tokens += n_input_tokens + n_output_tokens
 
         n_input_spent_dollars = config.models["info"][model_key]["price_per_1000_input_tokens"] * (
@@ -618,7 +608,7 @@ async def show_balance_handle(update: Update, context: CallbackContext):
 
     # voice recognition
     voice_recognition_n_spent_dollars = config.models["info"]["whisper"]["price_per_1_min"] * (
-            n_transcribed_seconds / 60)
+        n_transcribed_seconds / 60)
     if n_transcribed_seconds != 0:
         details_text += f"- Whisper (voice recognition): <b>{voice_recognition_n_spent_dollars:.03f}$</b> / <b>{n_transcribed_seconds:.01f} seconds</b>\n"
 
@@ -680,6 +670,8 @@ def run_bot() -> None:
         .token(config.telegram_token)
         .concurrent_updates(True)
         .rate_limiter(AIORateLimiter(max_retries=5))
+        .http_version("1.1")
+        .get_updates_http_version("1.1")
         .post_init(post_init)
         .build()
     )
@@ -688,8 +680,11 @@ def run_bot() -> None:
     user_filter = filters.ALL
     if len(config.allowed_telegram_usernames) > 0:
         usernames = [x for x in config.allowed_telegram_usernames if isinstance(x, str)]
-        user_ids = [x for x in config.allowed_telegram_usernames if isinstance(x, int)]
-        user_filter = filters.User(username=usernames) | filters.User(user_id=user_ids)
+        any_ids = [x for x in config.allowed_telegram_usernames if isinstance(x, int)]
+        user_ids = [x for x in any_ids if x > 0]
+        group_ids = [x for x in any_ids if x < 0]
+        user_filter = filters.User(username=usernames) | filters.User(user_id=user_ids) | filters.Chat(
+            chat_id=group_ids)
 
     application.add_handler(CommandHandler("start", start_handle, filters=user_filter))
     application.add_handler(CommandHandler("help", help_handle, filters=user_filter))
